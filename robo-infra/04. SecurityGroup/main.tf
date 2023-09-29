@@ -93,8 +93,8 @@ resource "aws_security_group_rule" "alb_private" {
   security_group_id = aws_security_group.alb_private.id
 
   type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
+  from_port                = 8080
+  to_port                  = 8080
   protocol                 = "http"
   source_security_group_id = aws_security_group.component["web"].id
 }
@@ -117,10 +117,78 @@ resource "aws_security_group_rule" "api_components" {
   security_group_id = aws_security_group.component[each.value].id
 
   type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
+  from_port                = 8080
+  to_port                  = 8080
   protocol                 = "http"
   source_security_group_id = aws_security_group.alb_private.id
 }
 
+resource "aws_security_group_rule" "user_mongo" {
+  security_group_id = aws_security_group.component["mongodb"].id
 
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["user"].id
+}
+
+resource "aws_security_group_rule" "catalouge_mongo" {
+  security_group_id = aws_security_group.component["mongodb"].id
+
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["catalouge"].id
+}
+
+resource "aws_security_group_rule" "cart_redis" {
+  security_group_id = aws_security_group.component["redis"].id
+
+  type                     = "ingress"
+  from_port                = 6379
+  to_port                  = 6379
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["cart"].id
+}
+
+resource "aws_security_group_rule" "user_redis" {
+  security_group_id = aws_security_group.component["redis"].id
+
+  type                     = "ingress"
+  from_port                = 6379
+  to_port                  = 6379
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["user"].id
+}
+
+resource "aws_security_group_rule" "shipping_mysql" {
+  security_group_id = aws_security_group.component["mysql"].id
+
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["shipping"].id
+}
+
+resource "aws_security_group_rule" "rating_mysql" {
+  security_group_id = aws_security_group.component["mysql"].id
+
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["rating"].id
+}
+
+resource "aws_security_group_rule" "payment_rabbit" {
+  security_group_id = aws_security_group.component["rabbitmq"].id
+
+  type                     = "ingress"
+  from_port                = 5672
+  to_port                  = 5672
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.component["payment"].id
+}
