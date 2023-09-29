@@ -65,16 +65,34 @@ resource "aws_security_group" "component" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(var.common_tags,
+    {
+      Name = each.value
+    }
+  )
 }
 
 resource "aws_security_group" "alb_public" {
   name   = "allowing internet traffic to alb public"
   vpc_id = data.aws_ssm_parameter.vpc2_id.value
+
+  tags = merge(var.common_tags,
+    {
+      Name = "alb_public"
+    }
+  )
 }
 
 resource "aws_security_group" "alb_private" {
   name   = "allowing web traffic to alb private"
   vpc_id = data.aws_ssm_parameter.vpc2_id.value
+
+  tags = merge(var.common_tags,
+    {
+      Name = "alb_private"
+    }
+  )
 }
 
 resource "aws_security_group_rule" "alb_public" {
@@ -84,7 +102,7 @@ resource "aws_security_group_rule" "alb_public" {
   type        = "ingress"
   from_port   = 443
   to_port     = 443
-  protocol    = "https"
+  protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
 
@@ -95,7 +113,7 @@ resource "aws_security_group_rule" "alb_private" {
   type                     = "ingress"
   from_port                = 8080
   to_port                  = 8080
-  protocol                 = "http"
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.component["web"].id
 }
 
@@ -106,7 +124,7 @@ resource "aws_security_group_rule" "web" {
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443
-  protocol                 = "https"
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.alb_public.id
 }
 
@@ -119,7 +137,7 @@ resource "aws_security_group_rule" "api_components" {
   type                     = "ingress"
   from_port                = 8080
   to_port                  = 8080
-  protocol                 = "http"
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.alb_private.id
 }
 
