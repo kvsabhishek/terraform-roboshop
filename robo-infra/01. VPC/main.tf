@@ -63,3 +63,15 @@ resource "aws_route_table" "vpc2" {
     }
   )
 }
+
+resource "aws_route_table_association" "vpc1" {
+  for_each       = aws_subnet.vpc1
+  route_table_id = aws_route_table.vpc1["${each.key}"].id
+  subnet_id      = each.value.id
+}
+
+resource "aws_route_table_association" "vpc2" {
+  for_each       = aws_subnet.vpc2
+  route_table_id = aws_route_table.vpc2["${each.key}"].id
+  subnet_id      = each.value.id
+}

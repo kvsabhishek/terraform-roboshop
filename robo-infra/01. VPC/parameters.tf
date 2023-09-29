@@ -5,6 +5,13 @@ resource "aws_ssm_parameter" "vpc_cidrs" {
   value    = each.value
 }
 
+resource "aws_ssm_parameter" "vpc_id" {
+  for_each = aws_vpc.vpc
+  type     = "String"
+  name     = "/${var.project_name}/${var.environment}/${each.key}_id"
+  value    = each.value.id
+}
+
 resource "aws_ssm_parameter" "internet_gateway" {
   for_each = aws_internet_gateway.vpc
   type     = "String"
