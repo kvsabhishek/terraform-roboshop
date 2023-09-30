@@ -6,7 +6,7 @@ resource "aws_launch_template" "template" {
   instance_type = each.value == "mysql" ? "t3.medium" : "t2.micro"
 
   instance_initiated_shutdown_behavior = "terminate"
-  vpc_security_group_ids               = ["${data.aws_ssm_parameter.sg[each.value].value}", "${data.aws_ssm_parameter.sg["vpc2"].value}"]
+  vpc_security_group_ids               = each.value == "web" ? ["${data.aws_ssm_parameter.sg[each.value].value}", "${data.aws_ssm_parameter.sg["vpc1"].value}"] : ["${data.aws_ssm_parameter.sg[each.value].value}", "${data.aws_ssm_parameter.sg["vpc2"].value}"]
 
   tag_specifications {
     resource_type = "instance"
