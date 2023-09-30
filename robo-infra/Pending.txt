@@ -1,0 +1,5 @@
+1. Cannot create autoscaling for db components. Need to modifie autoscaling code only to create for app tier components.
+
+2. Load balancer created. Need to create target group and attach autoscaling to target group.
+
+3. Since db components are removed from autoscaling need to create code for creating db components

@@ -1,4 +1,4 @@
-resource "aws_autoscaling_group" "name" {
+resource "aws_autoscaling_group" "autoscale" {
   for_each                  = toset(concat(["web"], local.components))
   name                      = each.value
   max_size                  = 5
@@ -20,5 +20,20 @@ resource "aws_autoscaling_group" "name" {
     key                 = "Name"
     value               = each.value
     propagate_at_launch = true
+  }
+}
+
+resource "aws_autoscaling_policy" "policy" {
+  for_each = aws_autoscaling_group.autoscale
+
+  autoscaling_group_name = each.value.name
+  name                   = each.key
+  policy_type            = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 80.0
   }
 }

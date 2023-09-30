@@ -22,3 +22,7 @@ variable "lb" {
 variable "api_tier_components" {
   default = ["catalouge", "cart", "user", "shipping", "payment", "rating"]
 }
+
+variable "db_tier_components" {
+  default = ["mongodb", "redis", "mysql", "rabbitmq"]
+}

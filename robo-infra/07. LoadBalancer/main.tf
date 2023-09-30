@@ -13,3 +13,10 @@ resource "aws_lb" "lb" {
     }
   )
 }
+
+resource "aws_lb_target_group" "target" {
+  for_each = toset(concat(["web"], local.components))
+
+  name     = each.value
+  protocol = 8080
+}
