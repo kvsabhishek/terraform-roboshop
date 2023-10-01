@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "autoscale" {
-  for_each                  = toset(concat(["web"], local.components))
+  for_each                  = toset(concat(["web"], var.api_tier_components))
   name                      = each.value
   max_size                  = 5
   min_size                  = 1
@@ -12,7 +12,7 @@ resource "aws_autoscaling_group" "autoscale" {
     version = "$Latest"
   }
 
-  vpc_zone_identifier = contains(var.api_tier_components, each.value) ? ["${data.aws_ssm_parameter.private_subent.value}"] : contains(var.db_tier_components, each.value) ? ["${data.aws_ssm_parameter.database_subent.value}"] : ["${data.aws_ssm_parameter.public_subent.value}"]
+  vpc_zone_identifier = contains(var.api_tier_components, each.value) ? ["${data.aws_ssm_parameter.private_subent.value}"] : ["${data.aws_ssm_parameter.public_subent.value}"]
 
   #   launch_configuration = data.aws_ssm_parameter.template["${each.value}"].value
 
@@ -35,5 +35,14 @@ resource "aws_autoscaling_policy" "policy" {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
     target_value = 80.0
+  }
+}
+
+resource "aws_instance" "db" {
+  for_each = var.db_tier_components
+  launch_template {
+    name    = data.aws_ssm_parameter.launch_template_name["${each.value}"].value
+    id      = data.aws_ssm_parameter.launch_template_id["${each.value}"].value
+    version = "$Latest"
   }
 }
