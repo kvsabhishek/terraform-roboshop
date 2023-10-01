@@ -13,3 +13,13 @@ data "aws_ssm_parameter" "public_subent" {
 data "aws_ssm_parameter" "private_subent" {
   name = "/${var.project_name}/${var.environment}/vpc-2/private-subnet_id"
 }
+
+data "aws_ssm_parameter" "vpc2_id" {
+  name = "/${var.project_name}/${var.environment}/vpc-2_id"
+}
+
+data "aws_route53_zone" "devopsground" {
+  name         = "devopsground.online"
+  private_zone = false
+}
+

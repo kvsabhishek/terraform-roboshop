@@ -22,13 +22,4 @@ data "aws_ssm_parameter" "database_subent" {
   name = "/${var.project_name}/${var.environment}/vpc-2/database-subnet_id"
 }
 
-data "aws_ssm_parameter" "launch_template_name" {
-  for_each = toset(concat(["web"], local.components))
-  name     = "/${var.project_name}/${var.environment}/${each.value}_template_name"
-}
-
-data "aws_ssm_parameter" "launch_template_id" {
-  for_each = toset(concat(["web"], local.components))
-  name     = "/${var.project_name}/${var.environment}/${each.value}_template_id"
-}
 

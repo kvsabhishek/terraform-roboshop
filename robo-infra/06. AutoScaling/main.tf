@@ -39,10 +39,15 @@ resource "aws_autoscaling_policy" "policy" {
 }
 
 resource "aws_instance" "db" {
-  for_each = var.db_tier_components
+  for_each = toset(var.db_tier_components)
   launch_template {
-    name    = data.aws_ssm_parameter.launch_template_name["${each.value}"].value
-    id      = data.aws_ssm_parameter.launch_template_id["${each.value}"].value
+    # name    = data.aws_ssm_parameter.template_name["${each.value}"].value
+    id      = data.aws_ssm_parameter.template_id["${each.value}"].value
     version = "$Latest"
   }
+
+  subnet_id = data.aws_ssm_parameter.database_subent.value
+
 }
+
+

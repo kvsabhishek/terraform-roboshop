@@ -20,7 +20,7 @@ data "aws_ami" "devops_ami" {
 }
 
 data "aws_ssm_parameter" "sg" {
-  for_each = toset(concat(["vpc2", "web", "alb_public", "alb_private"], local.components))
+  for_each = toset(concat(["vpc1", "vpc2", "web", "alb_public", "alb_private"], local.components))
 
   name = "/${var.project_name}/${var.environment}/${each.value}_sg_id"
 }

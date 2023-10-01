@@ -4,7 +4,7 @@ resource "aws_security_group" "vpc1" {
   tags = merge(
     var.common_tags,
     {
-      Name = "VPN"
+      Name = "vpc1"
     }
   )
 
@@ -32,7 +32,7 @@ resource "aws_security_group" "vpc2" {
   tags = merge(
     var.common_tags,
     {
-      Name = "VPN-VPC"
+      Name = "vpc2"
     }
   )
 
@@ -56,7 +56,7 @@ resource "aws_security_group" "vpc2" {
 resource "aws_security_group" "component" {
   for_each = toset(concat(["web"], local.components))
   name     = "security group for ${each.value}"
-  vpc_id   = data.aws_ssm_parameter.vpc2_id.value
+  vpc_id   = each.value == "web" ? data.aws_ssm_parameter.vpc1_id.value : data.aws_ssm_parameter.vpc2_id.value
 
   egress {
     description = "Allowing all output"

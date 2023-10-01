@@ -15,10 +15,11 @@ variable "common_tags" {
 
 variable "lb" {
   default = {
-    "Public_ALB"  = "public",
-    "Private_ALB" = "private"
+    "PublicALB"  = "public",
+    "PrivateALB" = "private"
   }
 }
+
 variable "api_tier_components" {
   default = ["catalouge", "cart", "user", "shipping", "payment", "rating"]
 }
