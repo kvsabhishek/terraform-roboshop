@@ -114,12 +114,12 @@ resource "aws_internet_gateway" "vpc_igw" {
 }
 
 resource "aws_eip" "vpc2" {
-  count = length(local.vpc2_private_subnets) != 0 ? 1 : 0
+  count = length(local.vpc2_private_subnets)
 }
 
 resource "aws_nat_gateway" "vpc2_nat" {
   count         = length(local.vpc2_private_subnets)
-  allocation_id = aws_eip.vpc2[0].id
+  allocation_id = aws_eip.vpc2[count.index].id
   subnet_id     = local.vpc2_private_subnets[count.index].id
 
   tags = merge({
@@ -130,24 +130,37 @@ resource "aws_nat_gateway" "vpc2_nat" {
 }
 
 
-resource "aws_route_table" "vpc1" {
+resource "aws_route_table" "vpc1_route" {
   count  = length(local.vpc1_subnets)
   vpc_id = aws_vpc.vpc["vpc1"].id
 
   tags = merge({
-    Name = "${local.vpc1_subnets[count.index].tags.Name}"
+    Name = "${local.vpc1_subnets[count.index].tags.Name}-table"
     },
     var.common_tags
   )
 }
 
-resource "aws_route_table" "vpc2" {
+resource "aws_route_table" "vpc2_route" {
   count  = length(local.vpc2_subnets)
   vpc_id = aws_vpc.vpc["vpc2"].id
 
   tags = merge({
-    Name = "${local.vpc2_subnets[count.index].tags.Name}"
+    Name = "${local.vpc2_subnets[count.index].tags.Name}-table"
     },
     var.common_tags
   )
+}
+
+
+resource "aws_route_table_association" "vpc1_route" {
+  count          = length(local.vpc1_subnets)
+  subnet_id      = local.vpc1_subnets[count.index].id
+  route_table_id = aws_route_table.vpc1_route[count.index].id
+}
+
+resource "aws_route_table_association" "vpc2_route" {
+  count          = length(local.vpc2_subnets)
+  subnet_id      = local.vpc2_subnets[count.index].id
+  route_table_id = aws_route_table.vpc2_route[count.index].id
 }
