@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  for_each = local.vpc_cidr_list
+  for_each = var.vpc_cidrs
 
   cidr_block           = each.value
   enable_dns_support   = true
@@ -15,7 +15,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "vpc1_public" {
   count                   = length(local.vpc1_public_az)
   vpc_id                  = aws_vpc.vpc["vpc1"].id
-  cidr_block              = var.vpc1_public_subnet_cidrs[count.index]
+  cidr_block              = var.vpc1_public_subnets[count.index]
   availability_zone       = local.vpc1_public_az[count.index]
   map_public_ip_on_launch = true
 
@@ -30,7 +30,7 @@ resource "aws_subnet" "vpc1_public" {
 resource "aws_subnet" "vpc1_private" {
   count                   = length(local.vpc1_private_az)
   vpc_id                  = aws_vpc.vpc["vpc1"].id
-  cidr_block              = var.vpc1_private_subnet_cidrs[count.index]
+  cidr_block              = var.vpc1_private_subnets[count.index]
   availability_zone       = local.vpc1_private_az[count.index]
   map_public_ip_on_launch = false
 
@@ -45,7 +45,7 @@ resource "aws_subnet" "vpc1_private" {
 resource "aws_subnet" "vpc1_database" {
   count                   = length(local.vpc1_database_az)
   vpc_id                  = aws_vpc.vpc["vpc1"].id
-  cidr_block              = var.vpc1_database_subnet_cidrs[count.index]
+  cidr_block              = var.vpc1_database_subnets[count.index]
   availability_zone       = local.vpc1_database_az[count.index]
   map_public_ip_on_launch = false
 
@@ -60,7 +60,7 @@ resource "aws_subnet" "vpc1_database" {
 resource "aws_subnet" "vpc2_public" {
   count                   = length(local.vpc2_public_az)
   vpc_id                  = aws_vpc.vpc["vpc2"].id
-  cidr_block              = var.vpc2_public_subnet_cidrs[count.index]
+  cidr_block              = var.vpc2_public_subnets[count.index]
   availability_zone       = local.vpc2_public_az[count.index]
   map_public_ip_on_launch = true
 
@@ -75,7 +75,7 @@ resource "aws_subnet" "vpc2_public" {
 resource "aws_subnet" "vpc2_private" {
   count                   = length(local.vpc2_private_az)
   vpc_id                  = aws_vpc.vpc["vpc2"].id
-  cidr_block              = var.vpc2_private_subnet_cidrs[count.index]
+  cidr_block              = var.vpc2_private_subnets[count.index]
   availability_zone       = local.vpc2_private_az[count.index]
   map_public_ip_on_launch = false
 
@@ -90,13 +90,63 @@ resource "aws_subnet" "vpc2_private" {
 resource "aws_subnet" "vpc2_database" {
   count                   = length(local.vpc2_database_az)
   vpc_id                  = aws_vpc.vpc["vpc2"].id
-  cidr_block              = var.vpc2_database_subnet_cidrs[count.index]
+  cidr_block              = var.vpc2_database_subnets[count.index]
   availability_zone       = local.vpc2_database_az[count.index]
   map_public_ip_on_launch = false
 
   tags = merge(
     {
       Name = "vpc2-database-${local.vpc2_database_az[count.index]}"
+    },
+    var.common_tags
+  )
+}
+
+resource "aws_internet_gateway" "vpc_igw" {
+  for_each = aws_vpc.vpc
+  vpc_id   = each.value.id
+
+  tags = merge({
+    Name = "${each.key}-igw"
+    },
+    var.common_tags
+  )
+}
+
+resource "aws_eip" "vpc2" {
+  count = length(local.vpc2_private_subnets) != 0 ? 1 : 0
+}
+
+resource "aws_nat_gateway" "vpc2_nat" {
+  count         = length(local.vpc2_private_subnets)
+  allocation_id = aws_eip.vpc2[0].id
+  subnet_id     = local.vpc2_private_subnets[count.index].id
+
+  tags = merge({
+    Name = "vpc2-nat"
+    },
+    var.common_tags
+  )
+}
+
+
+resource "aws_route_table" "vpc1" {
+  count  = length(local.vpc1_subnets)
+  vpc_id = aws_vpc.vpc["vpc1"].id
+
+  tags = merge({
+    Name = "${local.vpc1_subnets[count.index].tags.Name}"
+    },
+    var.common_tags
+  )
+}
+
+resource "aws_route_table" "vpc2" {
+  count  = length(local.vpc2_subnets)
+  vpc_id = aws_vpc.vpc["vpc2"].id
+
+  tags = merge({
+    Name = "${local.vpc2_subnets[count.index].tags.Name}"
     },
     var.common_tags
   )
