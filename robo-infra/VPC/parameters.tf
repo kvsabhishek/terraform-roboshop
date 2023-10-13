@@ -63,3 +63,17 @@ resource "aws_ssm_parameter" "vpc2_database_subnet_ids" {
   type  = "String"
   value = aws_subnet.vpc2_database[count.index].id
 }
+
+resource "aws_ssm_parameter" "vpc1_route_tables" {
+  for_each = local.vpc1_route_tables_id
+  name     = each.key
+  type     = "String"
+  value    = each.value
+}
+
+resource "aws_ssm_parameter" "vpc2_route_tables" {
+  for_each = local.vpc2_route_tables_id
+  name     = each.key
+  type     = "String"
+  value    = each.value
+}

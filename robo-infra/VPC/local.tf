@@ -13,4 +13,7 @@ locals {
 
   vpc1_subnets = concat(aws_subnet.vpc1_public, aws_subnet.vpc1_private, aws_subnet.vpc1_database)
   vpc2_subnets = concat(aws_subnet.vpc2_public, aws_subnet.vpc2_private, aws_subnet.vpc2_database)
+
+  vpc1_route_tables_id = { for route in aws_route_table.vpc1_route : route.tags.Name => route.id }
+  vpc2_route_tables_id = { for route in aws_route_table.vpc2_route : route.tags.Name => route.id }
 }

@@ -114,13 +114,13 @@ resource "aws_internet_gateway" "vpc_igw" {
 }
 
 resource "aws_eip" "vpc2" {
-  count = length(local.vpc2_private_subnets)
+  count = length(local.vpc2_private_subnets) > 0 ? 1 : 0
 }
 
 resource "aws_nat_gateway" "vpc2_nat" {
-  count         = length(local.vpc2_private_subnets)
-  allocation_id = aws_eip.vpc2[count.index].id
-  subnet_id     = local.vpc2_private_subnets[count.index].id
+  count         = length(local.vpc2_private_subnets) > 0 ? 1 : 0
+  allocation_id = aws_eip.vpc2[0].id
+  subnet_id     = aws_subnet.vpc2_public[0].id
 
   tags = merge({
     Name = "vpc2-nat"
