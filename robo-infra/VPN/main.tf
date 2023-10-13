@@ -11,5 +11,5 @@ module "vpc_infra" {
 }
 
 # resource "aws_vpc_peering_connection" "vpc1_vpc2" {
-#   peer_vpc_id = 
+#   peer_vpc_id = module.vpc
 # }

@@ -32,5 +32,4 @@ variable "common_tags" {
     Terraform = true,
     Project   = "Roboshop"
   }
-
 }
