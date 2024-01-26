@@ -10,6 +10,27 @@ module "vpc_infra" {
   common_tags           = var.common_tags
 }
 
-# resource "aws_vpc_peering_connection" "vpc1_vpc2" {
-#   peer_vpc_id = module.vpc
-# }
+resource "aws_vpc_peering_connection" "vpc1_vpc2" {
+  peer_vpc_id = data.aws_ssm_parameter.vpc1_id.value
+  vpc_id      = data.aws_ssm_parameter.vpc2_id.value
+  auto_accept = true
+}
+
+resource "aws_route" "vcp1_public_routes" {
+  for_each                  = module.vpc_infra.vpc1_route_tables_id
+  destination_cidr_block    = var.vpc_cidrs["vpc2"]
+  route_table_id            = each.value
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc1_vpc2.id
+}
+
+resource "aws_route" "vcp2_public_routes" {
+  for_each                  = module.vpc_infra.vpc2_route_tables_id
+  destination_cidr_block    = var.vpc_cidrs["vpc1"]
+  route_table_id            = each.value
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc1_vpc2.id
+}
+
+
+
+
+
